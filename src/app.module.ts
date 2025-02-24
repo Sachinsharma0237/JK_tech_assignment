@@ -3,8 +3,11 @@ import { AuthModule } from './auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import * as path from 'path';
 import * as dotenv from 'dotenv';
+import { APP_GUARD } from '@nestjs/core';
+import { RolesGuard } from './common/guards/roles.guard';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule } from '@nestjs/config';
+import { UsersModule } from './users/users.module';
 dotenv.config({ path: `${__dirname}/../.env` });
 
 @Module({
@@ -21,8 +24,14 @@ dotenv.config({ path: `${__dirname}/../.env` });
       synchronize: true, // Auto-create tables
     }),
     AuthModule,
+    UsersModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard, // Global Role Guard
+    },
+  ],
 })
 export class AppModule {}

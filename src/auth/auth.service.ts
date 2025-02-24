@@ -2,7 +2,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Repository } from 'typeorm';
-import { User } from './user.entity';
+import { UsersService } from '../users/users.service';
+import { User } from '../users/entities/user.entity';
 import * as bcrypt from 'bcryptjs';
 
 @Injectable()
@@ -11,6 +12,7 @@ export class AuthService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly jwtService: JwtService,
+    private usersService: UsersService
   ) {}
 
   async login(email: string, password: string, response: any) {

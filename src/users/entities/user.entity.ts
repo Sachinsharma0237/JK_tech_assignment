@@ -1,5 +1,11 @@
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
+export enum UserRole {
+  ADMIN = 'admin',
+  EDITOR = 'editor',
+  USER = 'user',
+}
+
 @Entity()
 export class User {
   @PrimaryGeneratedColumn() // Auto-incrementing primary key
@@ -11,6 +17,6 @@ export class User {
   @Column()
   password: string;
 
-  @Column({ default: 'user' }) // Default role is 'user'
-  role: string;
+  @Column({ type: 'enum', enum: UserRole, default: UserRole.USER }) // Default role is 'user'
+  role: UserRole;
 }
