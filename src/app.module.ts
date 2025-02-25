@@ -8,6 +8,8 @@ import { RolesGuard } from './common/guards/roles.guard';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule } from '@nestjs/config';
 import { UsersModule } from './users/users.module';
+import { DocumentModule } from './document/document.module';
+import { MulterModule } from '@nestjs/platform-express';
 dotenv.config({ path: `${__dirname}/../.env` });
 
 @Module({
@@ -23,8 +25,12 @@ dotenv.config({ path: `${__dirname}/../.env` });
       autoLoadEntities: true,
       synchronize: true, // Auto-create tables
     }),
+    MulterModule.register({
+      dest: './uploads', // Store files locally
+    }),
     AuthModule,
     UsersModule,
+    DocumentModule,
   ],
   controllers: [],
   providers: [
