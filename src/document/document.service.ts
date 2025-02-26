@@ -4,10 +4,12 @@ import { Repository } from 'typeorm';
 import { Document } from './entities/document.entity';
 import { Multer } from 'multer';
 import { join } from 'path';
-import { writeFile, unlink } from 'fs/promises';
+import { writeFile, unlink, mkdir } from 'fs/promises';
 
 @Injectable()
 export class DocumentService {
+  private uploadDir = join(__dirname, '../../uploads');
+
   constructor(
     @InjectRepository(Document)
     private documentRepository: Repository<Document>,
@@ -15,17 +17,27 @@ export class DocumentService {
 
   async uploadDocument(file: Multer.File) {
     const filename = `${Date.now()}-${file.originalname}`;
-    const filepath = join(__dirname, '../../uploads', filename);
+    const filepath = join(this.uploadDir, filename);
 
-    await writeFile(filepath, file.buffer); // Save file to disk
+    try {
+      // Ensure uploads directory exists
+      await mkdir(this.uploadDir, { recursive: true });
 
-    const document = this.documentRepository.create({
-      filename,
-      filepath,
-      mimetype: file.mimetype,
-    });
+      // Save file to disk
+      await writeFile(filepath, file.buffer);
 
-    return await this.documentRepository.save(document);
+      // Save document metadata in the database
+      const document = this.documentRepository.create({
+        filename,
+        filepath,
+        mimetype: file.mimetype,
+      });
+
+      return await this.documentRepository.save(document);
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      throw new Error('File upload failed');
+    }
   }
 
   async getDocuments() {
@@ -40,7 +52,12 @@ export class DocumentService {
     const document = await this.getDocumentById(id);
     if (!document) return null;
 
-    await unlink(document.filepath); // Delete file from disk
+    try {
+      await unlink(document.filepath); // Delete file from disk
+    } catch (error) {
+      console.error(`Error deleting file ${document.filepath}:`, error);
+    }
+
     return this.documentRepository.remove(document);
   }
 }

@@ -22,8 +22,8 @@ export class AuthController {
 
   @Post('/register')
   async register(@Body() body: any, @Response({ passthrough: true }) response) {
-    const { email, password } = body;
-    return this.authService.register(email, password, response);
+    const { email, password, role } = body;
+    return this.authService.register(email, password, role, response);
   }
 
   @Put('/change-password')

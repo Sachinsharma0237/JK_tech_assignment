@@ -20,12 +20,14 @@ export class UsersController {
 
   @Get('')
   @Roles('admin', 'editor') // Only Admin and Editor can list users
+  @UseGuards(RolesGuard)
   getAllUsers(@Response({ passthrough: true }) response) {
     return this.usersService.getAllUsers(response);
   }
 
   @Patch(':id/role')
   @Roles('admin') // Only Admin can update roles
+  @UseGuards(RolesGuard)
   updateUserRole(
     @Param('id') id: number,
     @Body('role') role: UserRole,
@@ -36,6 +38,7 @@ export class UsersController {
 
   @Delete(':id')
   @Roles('admin') // Only Admin can delete users
+  @UseGuards(RolesGuard)
   deleteUser(
     @Param('id') id: number,
     @Response({ passthrough: true }) response,

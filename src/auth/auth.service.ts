@@ -12,7 +12,7 @@ export class AuthService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly jwtService: JwtService,
-    private usersService: UsersService
+    private usersService: UsersService,
   ) {}
 
   async login(email: string, password: string, response: any) {
@@ -38,6 +38,12 @@ export class AuthService {
         email: user.email,
         role: user.role,
       });
+
+      await this.userRepository.update(
+        { email: email },
+        { accessToken: token },
+      );
+
       response.status(200).send({
         accessToken: token,
         message: 'logged In!',
@@ -48,7 +54,7 @@ export class AuthService {
     }
   }
 
-  async register(email: string, password: string, response: any) {
+  async register(email: string, password: string, role: string, response: any) {
     try {
       const isUserExist = await this.userRepository.findOne({
         where: { email },
@@ -65,6 +71,7 @@ export class AuthService {
       const user = this.userRepository.create({
         email,
         password: hashedPassword,
+        role: role || 'user',
       });
       await this.userRepository.save(user);
       return {
