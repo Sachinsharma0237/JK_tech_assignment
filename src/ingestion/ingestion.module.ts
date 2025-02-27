@@ -1,13 +1,18 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { Ingestion } from './entities/ingestion.entity';
-import { IngestionService } from './ingestion.service';
+import { ClientsModule, Transport } from '@nestjs/microservices';
 import { IngestionController } from './ingestion.controller';
-import { HttpModule } from '@nestjs/axios';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Ingestion]), HttpModule],
-  providers: [IngestionService],
+  imports: [
+    ClientsModule.register([
+      {
+        name: 'INGESTION_SERVICE',
+        transport: Transport.TCP,
+        options: { host: '127.0.0.1', port: 4001 }, // Microservice address
+      },
+    ]),
+  ],
   controllers: [IngestionController],
+  exports: [ClientsModule],
 })
 export class IngestionModule {}

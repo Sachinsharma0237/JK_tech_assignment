@@ -3,6 +3,7 @@ import { AuthModule } from './auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import * as path from 'path';
 import * as dotenv from 'dotenv';
+import { ClientsModule, Transport } from '@nestjs/microservices';
 import { APP_GUARD } from '@nestjs/core';
 import { RolesGuard } from './common/guards/roles.guard';
 import { JwtModule } from '@nestjs/jwt';
@@ -15,6 +16,13 @@ dotenv.config({ path: `${__dirname}/../.env` });
 
 @Module({
   imports: [
+    ClientsModule.register([
+      {
+        name: 'INGESTION_SERVICE',
+        transport: Transport.TCP,
+        options: { host: '127.0.0.1', port: 4001 },
+      },
+    ]),
     ConfigModule.forRoot(),
     JwtModule.register({
       secret: process.env.JWT_SECRET_KEY,
