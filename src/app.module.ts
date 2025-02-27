@@ -10,6 +10,7 @@ import { ConfigModule } from '@nestjs/config';
 import { UsersModule } from './users/users.module';
 import { DocumentModule } from './document/document.module';
 import { MulterModule } from '@nestjs/platform-express';
+import { IngestionModule } from './ingestion/ingestion.module';
 dotenv.config({ path: `${__dirname}/../.env` });
 
 @Module({
@@ -31,6 +32,7 @@ dotenv.config({ path: `${__dirname}/../.env` });
     AuthModule,
     UsersModule,
     DocumentModule,
+    IngestionModule,
   ],
   controllers: [],
   providers: [
