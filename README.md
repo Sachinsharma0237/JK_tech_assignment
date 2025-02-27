@@ -26,3 +26,10 @@ Step 4: Document Management (CRUD, Uploads)
 For Document Management, you will handle CRUD operations on documents (create, read, update, delete), as well as file uploads.
 
 Step 5: Ingestion Trigger API
+Created an API endpoint (POST /ingestion/trigger/:documentId)
+Called the Python backend using HttpService
+Handled errors properly
+Configured the module to use HttpModule and ConfigModule
+Tested the API with Postman.
+
+
