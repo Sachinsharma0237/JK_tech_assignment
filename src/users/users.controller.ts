@@ -1,48 +1,40 @@
 import {
   Controller,
   Get,
-  Patch,
-  Delete,
   Param,
+  Put,
+  Delete,
   Body,
-  UseGuards,
-  Response,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { Roles } from '../common/decorators/roles.decorator';
-import { RolesGuard } from '../common/guards/roles.guard';
-import { User, UserRole } from './entities/user.entity';
 
 @Controller('/api/users')
-@UseGuards(RolesGuard) // Apply Role Guard to all user routes
 export class UsersController {
-  constructor(private usersService: UsersService) {}
+  constructor(private readonly usersService: UsersService) {}
 
-  @Get('')
-  @Roles('admin', 'editor') // Only Admin and Editor can list users
-  @UseGuards(RolesGuard)
-  getAllUsers(@Response({ passthrough: true }) response) {
-    return this.usersService.getAllUsers(response);
+  @Get()
+  @HttpCode(HttpStatus.OK)
+  async getAllUsers() {
+    return this.usersService.getAllUsers();
   }
 
-  @Patch(':id/role')
-  @Roles('admin') // Only Admin can update roles
-  @UseGuards(RolesGuard)
-  updateUserRole(
-    @Param('id') id: number,
-    @Body('role') role: UserRole,
-    @Response({ passthrough: true }) response,
-  ) {
-    return this.usersService.updateUserRole(id, role, response);
+  @Get('/:id')
+  @HttpCode(HttpStatus.OK)
+  async getUserById(@Param('id') id: number) {
+    return this.usersService.getUserById(id);
   }
 
-  @Delete(':id')
-  @Roles('admin') // Only Admin can delete users
-  @UseGuards(RolesGuard)
-  deleteUser(
-    @Param('id') id: number,
-    @Response({ passthrough: true }) response,
-  ) {
-    return this.usersService.deleteUser(id, response);
+  @Put('/:id')
+  @HttpCode(HttpStatus.OK)
+  async updateUser(@Param('id') id: number, @Body() body: any) {
+    return this.usersService.updateUser(id, body);
+  }
+
+  @Delete('/:id')
+  @HttpCode(HttpStatus.OK)
+  async deleteUser(@Param('id') id: number) {
+    return this.usersService.deleteUser(id);
   }
 }

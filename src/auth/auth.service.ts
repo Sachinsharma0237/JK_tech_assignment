@@ -15,22 +15,16 @@ export class AuthService {
     private usersService: UsersService,
   ) {}
 
-  async login(email: string, password: string, response: any) {
+  async login(email: string, password: string) {
     try {
       const user = await this.userRepository.findOne({ where: { email } });
       if (!user) {
-        response.status(404).send({
-          message: 'Invalid email or password',
-        });
-        return;
+        return { status: 404, message: 'Invalid email or password' };
       }
 
       const isValid = await bcrypt.compare(password, user.password);
       if (!isValid) {
-        response.status(404).send({
-          message: 'Invalid email or password',
-        });
-        return;
+        return { status: 404, message: 'Invalid email or password' };
       }
 
       const token = this.jwtService.sign({
@@ -44,43 +38,38 @@ export class AuthService {
         { accessToken: token },
       );
 
-      response.status(200).send({
+      return {
+        status: 200,
         accessToken: token,
-        message: 'logged In!',
-      });
-      return;
+        message: 'Logged In!',
+      };
     } catch (error) {
-      console.log('login error:', error);
+      console.error('Login error:', error);
+      return { status: 500, message: 'Internal server error' };
     }
   }
 
-  async register(email: string, password: string, role: string, response: any) {
+  async register(email: string, password: string, role: string) {
     try {
-      const isUserExist = await this.userRepository.findOne({
+      const existingUser = await this.userRepository.findOne({
         where: { email },
       });
-
-      if (isUserExist) {
-        response.status(200).send({
-          message: 'user already exists!',
-        });
-        return;
+      if (existingUser) {
+        return { status: 400, message: 'User already exists' };
       }
 
-      const hashedPassword = await this.hashPassword(password);
-      const user = this.userRepository.create({
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const newUser = this.userRepository.create({
         email,
         password: hashedPassword,
-        role: role || 'user',
+        role,
       });
-      await this.userRepository.save(user);
-      return {
-        email,
-        password: hashedPassword,
-        message: 'user created sucessfully',
-      };
+      await this.userRepository.save(newUser);
+
+      return { status: 201, message: 'User registered successfully' };
     } catch (error) {
-      console.log('register error:', error);
+      console.error('Register error:', error);
+      return { status: 500, message: 'Internal server error' };
     }
   }
 
@@ -88,30 +77,25 @@ export class AuthService {
     email: string,
     oldPassword: string,
     newPassword: string,
-    response: any,
   ) {
     try {
       const user = await this.userRepository.findOne({ where: { email } });
       if (!user) {
-        response.status(404).send({
-          message: 'User not found!',
-        });
-        return;
+        return { status: 404, message: 'User not found' };
       }
 
       const isMatch = await bcrypt.compare(oldPassword, user.password);
       if (!isMatch) {
-        response.status(401).send({
-          message: 'old password is not correct!',
-        });
-        return;
+        return { status: 400, message: 'Incorrect old password' };
       }
 
       user.password = await bcrypt.hash(newPassword, 10);
       await this.userRepository.save(user);
-      return { message: 'Password changed successfully' };
+
+      return { status: 200, message: 'Password changed successfully' };
     } catch (error) {
-      console.log('changeUserPassword error:', error);
+      console.error('Change password error:', error);
+      return { status: 500, message: 'Internal server error' };
     }
   }
 

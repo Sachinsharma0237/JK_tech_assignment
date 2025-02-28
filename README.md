@@ -104,3 +104,7 @@ The main app (port 5000) sends an ingestion request to the ingestion microservic
 The ingestion microservice then communicates with the Python backend to process the document.
 
 Once processing is complete, the Python backend sends a response back to the ingestion microservice, which then notifies the main app.
+
+Step 4: Write test cases 
+required dependency: 
+npm install --save-dev @nestjs/testing jest ts-jest @types/jest supertest

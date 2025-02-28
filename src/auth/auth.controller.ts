@@ -1,12 +1,10 @@
 import {
   Body,
   Controller,
-  Get,
   Post,
   Put,
-  Req,
-  Request,
-  Response,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 
@@ -15,25 +13,23 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('/login')
-  async login(@Body() body: any, @Response({ passthrough: true }) response) {
+  @HttpCode(HttpStatus.OK)
+  async login(@Body() body: any) {
     const { email, password } = body;
-    return this.authService.login(email, password, response);
+    return this.authService.login(email, password);
   }
 
   @Post('/register')
-  async register(@Body() body: any, @Response({ passthrough: true }) response) {
+  @HttpCode(HttpStatus.CREATED)
+  async register(@Body() body: any) {
     const { email, password, role } = body;
-    return this.authService.register(email, password, role, response);
+    return this.authService.register(email, password, role);
   }
 
   @Put('/change-password')
-  async(@Body() body: any, @Response({ passthrough: true }) response) {
+  @HttpCode(HttpStatus.OK)
+  async changePassword(@Body() body: any) {
     const { email, oldPassword, newPassword } = body;
-    return this.authService.changeUserPassword(
-      email,
-      oldPassword,
-      newPassword,
-      response,
-    );
+    return this.authService.changeUserPassword(email, oldPassword, newPassword);
   }
 }

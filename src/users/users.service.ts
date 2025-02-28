@@ -1,57 +1,65 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User, UserRole } from './entities/user.entity';
+import { User } from './entities/user.entity';
 
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectRepository(User) private userRepository: Repository<User>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
   ) {}
 
-  async getAllUsers(response: any) {
+  async getAllUsers() {
     try {
       const users = await this.userRepository.find();
-      response.status(200).send({
-        users,
-        message: 'user list',
-      });
-      return;
+      return { status: 200, users };
     } catch (error) {
-      console.log('getAllUsers error:', error);
+      console.error('Get All Users Error:', error);
+      return { status: 500, message: 'Internal server error' };
     }
   }
 
-  async updateUserRole(userId: number, newRole: UserRole, response: any) {
+  async getUserById(id: number) {
     try {
-      const user = await this.userRepository.findOne({ where: { id: userId } });
+      const user = await this.userRepository.findOne({ where: { id } });
       if (!user) {
-        response.status(404).send({
-          message: 'User not found!',
-        });
-        return;
+        return { status: 404, message: 'User not found' };
       }
-
-      user.role = newRole;
-      return this.userRepository.save(user);
+      return { status: 200, user };
     } catch (error) {
-      console.log('updateUserRole error:', error);
+      console.error('Get User By ID Error:', error);
+      return { status: 500, message: 'Internal server error' };
     }
   }
 
-  async deleteUser(userId: number, response: any) {
+  async updateUser(id: number, updateData: Partial<User>) {
     try {
-      const result = await this.userRepository.delete(userId);
-      if (result.affected === 0) {
-        response.status(404).send({
-          message: 'User not found!',
-        });
-        return;
+      const user = await this.userRepository.findOne({ where: { id } });
+      if (!user) {
+        return { status: 404, message: 'User not found' };
       }
 
-      return { message: 'User deleted successfully' };
+      await this.userRepository.update(id, updateData);
+      return { status: 200, message: 'User updated successfully' };
     } catch (error) {
-      console.log('deleteUser error:', error);
+      console.error('Update User Error:', error);
+      return { status: 500, message: 'Internal server error' };
+    }
+  }
+
+  async deleteUser(id: number) {
+    try {
+      const user = await this.userRepository.findOne({ where: { id } });
+      if (!user) {
+        return { status: 404, message: 'User not found' };
+      }
+
+      await this.userRepository.delete(id);
+      return { status: 200, message: 'User deleted successfully' };
+    } catch (error) {
+      console.error('Delete User Error:', error);
+      return { status: 500, message: 'Internal server error' };
     }
   }
 }
